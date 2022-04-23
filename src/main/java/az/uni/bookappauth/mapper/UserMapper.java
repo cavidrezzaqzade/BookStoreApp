@@ -6,7 +6,6 @@ import az.uni.bookappauth.entity.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,10 +35,10 @@ public interface UserMapper {
                 .collect(Collectors.toList());
     }
 
-    @Named("setListLongToRole")
-    static List<Long> setListLongToRole(Set<RoleEntity> roles) {
-        return roles.stream()
-                .map(RoleEntity::getId)
-                .collect(Collectors.toList());
-    }
+//    @Named("setListLongToRole")
+//    static Set<RoleEntity> setListLongToRole(List<Long> ids) {
+//        return ids.stream()
+//                .map(e -> new RoleEntity())
+//                .collect(Collectors.toSet());
+//    }
 }

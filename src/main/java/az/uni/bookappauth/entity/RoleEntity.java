@@ -3,7 +3,6 @@ package az.uni.bookappauth.entity;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "roles", /*schema = "public",*/ schema = "public")
+@Table(name = "roles", schema = "public")
 public class RoleEntity {
 
     @Id

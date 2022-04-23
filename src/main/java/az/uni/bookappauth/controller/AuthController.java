@@ -4,6 +4,7 @@ import az.uni.bookappauth.domain.JwtRequest;
 import az.uni.bookappauth.domain.RefreshJwtRequest;
 import az.uni.bookappauth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("auth")
 @RequiredArgsConstructor
 @Tag(name = "Auth", description = "the auth API")
 public class AuthController {
@@ -33,7 +34,7 @@ public class AuthController {
         return authService.getAccessToken(request.getRefreshToken());
     }
 
-    @Operation(summary = "refresh", description = "get refresh-token", tags = {"Auth"})
+    @Operation(summary = "refresh", description = "get refresh-token", tags = {"Auth"}, security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("refresh")
     public ResponseEntity<?> getNewRefreshToken(@Valid @RequestBody RefreshJwtRequest request) {
         return authService.refresh(request.getRefreshToken());

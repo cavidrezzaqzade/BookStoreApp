@@ -34,7 +34,7 @@ public class RoleService {
             return MessageResponse.response(Reason.ALREADY_EXIST.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
         }
         RoleEntity roleEntity = new RoleEntity();
-        roleEntity.setRoleName(role.getRoleName());
+        roleEntity.setRoleName(role.getRoleName().toUpperCase(Locale.ROOT));
         roleRepository.save(roleEntity);
 
         RoleDto dto = roleMapper.roleToRoleDto(roleEntity);
@@ -95,7 +95,7 @@ public class RoleService {
             log.error("RoleService/updateRole method ended with rolename already exists -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
             return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        roleEntity.get().setRoleName(role.getRoleName());
+        roleEntity.get().setRoleName(role.getRoleName().toUpperCase(Locale.ROOT));
         roleRepository.save(roleEntity.get());
         RoleDto dto = roleMapper.roleToRoleDto(roleEntity.get());
         log.info("RoleService/updateRole method ended -> status:" + HttpStatus.OK);

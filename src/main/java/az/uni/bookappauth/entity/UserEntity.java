@@ -3,7 +3,6 @@ package az.uni.bookappauth.entity;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -15,7 +14,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users",/* schema = "public",*/ schema = "public")
+@Table(name = "users", schema = "public")
 public class UserEntity {
 
     @Id

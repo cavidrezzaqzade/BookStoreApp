@@ -1,11 +1,12 @@
 package az.uni.bookappauth;
 
-import az.uni.bookappauth.domain.User;
 import az.uni.bookappauth.entity.RoleEntity;
 import az.uni.bookappauth.entity.UserEntity;
 import az.uni.bookappauth.repository.UserRepository;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
@@ -13,7 +14,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Set;
 
-@OpenAPIDefinition(info = @Info(title = "AERS API", version = "1.0", description = "authentication service for aers"))
+@OpenAPIDefinition(info = @Info(title = "BookStore API", version = "1.0", description = "authentication service for BookStore"))
+@SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer")
 @SpringBootApplication(exclude= {UserDetailsServiceAutoConfiguration.class})
 public class BookAppAuthApplication {
 
