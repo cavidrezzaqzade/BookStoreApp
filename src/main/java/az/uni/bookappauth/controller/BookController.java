@@ -1,9 +1,7 @@
 package az.uni.bookappauth.controller;
 
-import az.uni.bookappauth.domain.UserDto;
 import az.uni.bookappauth.domain.app.BookDto;
 import az.uni.bookappauth.domain.app.SearchBookDto;
-import az.uni.bookappauth.service.UserService;
 import az.uni.bookappauth.service.app.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,8 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 
 @RestController
@@ -23,13 +21,6 @@ import javax.validation.Valid;
 public class BookController {
 
     private final BookService bookService;
-
-    @Operation(summary = "add book", description = "add new book", tags = {"Book"}, security = @SecurityRequirement(name = "bearerAuth"))
-    @PreAuthorize("hasAuthority('PUBLISHER')")
-    @PostMapping("books")
-    public ResponseEntity<?> addBook(@Valid @RequestBody BookDto book) {
-        return  bookService.addBook(book);
-    }
 
     @Operation(summary = "get books", description = "get all books", tags = {"Book"}, security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("books")
@@ -56,6 +47,23 @@ public class BookController {
     @GetMapping("books/users/{id}")
     public ResponseEntity<?> getBookByPublisher(@PathVariable(value = "id") Long id) {
         return bookService.getBookByPublisher(id);
+    }
+
+    @Operation(summary = "add book", description = "add new book", tags = {"Book"}, security = @SecurityRequirement(name = "bearerAuth"))
+    @PreAuthorize("hasAuthority('PUBLISHER')")
+    @PostMapping("books")
+    public ResponseEntity<?> addBook(@Valid @RequestBody BookDto book, Authentication auth) {
+        return  bookService.addBook(book, auth);
+    }
+
+    @Operation(summary = "update my book", description = "update the existing book", tags = {"Book"}, security = @SecurityRequirement(name = "bearerAuth"))
+    @PreAuthorize("hasAuthority('PUBLISHER')")
+    @PutMapping("books/{id}")
+    public ResponseEntity<?> updateBook(@Parameter(description = "Update an existing book in the database", required = true)
+                                        @Valid @RequestBody BookDto book,
+                                        @PathVariable(value = "id") Long id,
+                                        Authentication auth) {
+        return bookService.updateBook(book, id, auth);
     }
 
 }

@@ -24,10 +24,10 @@ public class BookDto {
     @NotBlank(message = "book name can not be empty")
     private String bookName;
 
+    @Min(value = 1,message = "pageCount must be greater than 0")
     private Integer pageCount;
 
-    @NotNull(message = "publisher id can not be null")
-    @Min(value = 1, message = "publiher id can not be 0 or negative")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long publisherId;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

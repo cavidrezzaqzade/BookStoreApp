@@ -2,6 +2,7 @@ package az.uni.bookappauth.service.app;
 
 import az.uni.bookappauth.domain.app.BookDto;
 import az.uni.bookappauth.domain.app.SearchBookDto;
+import az.uni.bookappauth.entity.AuthorEntity;
 import az.uni.bookappauth.entity.BookEntity;
 import az.uni.bookappauth.entity.RoleEntity;
 import az.uni.bookappauth.entity.UserEntity;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -53,11 +55,10 @@ public class BookService {
 
         List<BookDto> bookDtos;
 
-        if(books.hasContent()) {
+        if(books.hasContent())
             bookDtos = bookMapper.booksToBooksDto(books.getContent());
-        } else {
+        else
             bookDtos = new ArrayList<>();
-        }
 
         log.info("BookService/searchBooks method ended -> status:" + HttpStatus.OK);
         return MessageResponse.response(Reason.SUCCESS_GET.getValue(), bookDtos, null, HttpStatus.OK);
@@ -70,7 +71,7 @@ public class BookService {
         return MessageResponse.response(Reason.SUCCESS_GET.getValue(), bookDtos, null, HttpStatus.OK);
     }
 
-    public ResponseEntity<?> addBook(BookDto book){
+    public ResponseEntity<?> addBook(BookDto book, Authentication auth){
         log.info("BookService/addBook method started");
         Map<String, String> map = new HashMap<>();
 
@@ -91,7 +92,7 @@ public class BookService {
         BookEntity bookEntity = new BookEntity();
         bookEntity.setBookName(book.getBookName());
         bookEntity.setPageCount(book.getPageCount());
-        bookEntity.setPublisherId(book.getPublisherId());
+        bookEntity.setPublisherId(userRepository.findByUsernameIgnoreCase(auth.getPrincipal().toString()).get().getId());
 
         book.getAuthors().forEach(e -> bookEntity.addAuthor(authorMapper.authorDtoToAuthor(e)));
 
@@ -145,50 +146,34 @@ public class BookService {
         return MessageResponse.response(Reason.SUCCESS_GET.getValue(), booksDto, null, HttpStatus.OK);
     }
 
-//    public ResponseEntity<?> updateBook(BookDto book, Long bookId){
-//        log.info("BookService/updateBook method started");
-//        Map<String, String> map = new HashMap<>();
-//
-//        Optional<BookEntity> bookEntity = bookRepository.findById(bookId);
-//
-//        if(bookEntity.isEmpty())
-//            map.put("bookId", "data does not exist");
-//        if(!map.isEmpty()) {
-//            log.error("BookService/updateBook method ended with bookId doesn't exist -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
-//            return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
-//        }
-//
-//        List<Long> rolesIds = roleRepository.findAllIds();
-//        Optional<UserEntity> userByUserName = userRepository.findByUsernameIgnoreCase(user.getUsername());
-//
-//        if(!CheckContains(user.getRoles(), rolesIds))
-//            map.put("roles", "problem with role id(s)");
-//        if(userByUserName.isPresent())
-//            if(!Objects.equals(userByUserName.get().getId(), userId) && userByUserName.get().getUsername().equalsIgnoreCase(user.getUsername()))
-//                map.put("username", "username already exists");
-//        if(!map.isEmpty()){
-//            log.error("UserService/updateUser method ended with username already exists -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
-//            return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
-//        }
-//
-//        userEntity.get().setUsername(user.getUsername());
-//        userEntity.get().setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-//        userEntity.get().setName(user.getFirstname());
-//        userEntity.get().setSurname(user.getLastname());
-//
-//        Set<RoleEntity> remove = new HashSet<>(userEntity.get().getRoles());
-//        userEntity.get().getRoles().removeAll(remove);
-//
-//        Set<RoleEntity> add = new HashSet<>(userEntity.get().getRoles());
-//        for(Long id : user.getRoles()){
-//            add.add(roleRepository.findById(id).get());
-//        }
-//        userEntity.get().getRoles().addAll(add);
-//
-//        userRepository.save(userEntity.get());
-//        UserDto userDto = userMapper.userToUserDto(userEntity.get());
-//
-//        log.info("UserService/updateUser method ended -> status:" + HttpStatus.OK);
-//        return MessageResponse.response(Reason.SUCCESS_UPDATE.getValue(), userDto, null, HttpStatus.OK);
-//    }
+    public ResponseEntity<?> updateBook(BookDto book, Long bookId, Authentication auth){
+        log.info("BookService/updateBook method started");
+        Map<String, String> map = new HashMap<>();
+
+        Optional<BookEntity> bookEntity = bookRepository.findById(bookId);
+
+        if(bookEntity.isEmpty())
+            map.put("bookId", "data does not exist");
+        Long userId = userRepository.findByUsernameIgnoreCase(auth.getPrincipal().toString()).get().getId();
+        if(bookEntity.get().getPublisherId() != userId)
+            map.put("bookId", "publisher is not owner this book");
+        if(!map.isEmpty()) {
+            log.error("BookService/updateBook method ended with bookId doesn't exist -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
+            return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        bookEntity.get().setBookName(book.getBookName());
+        bookEntity.get().setPageCount(book.getPageCount());
+        bookEntity.get().setPublisherId(userId);
+
+        List<AuthorEntity> authors = bookEntity.get().getAuthors();
+        bookEntity.get().getAuthors().removeAll(authors);
+        book.getAuthors().forEach(e -> bookEntity.get().addAuthor(authorMapper.authorDtoToAuthor(e)));
+
+        bookRepository.save(bookEntity.get());
+        BookDto bookDto = bookMapper.bookToBookDto(bookEntity.get());
+
+        log.info("BookService/updateBook method ended -> status:" + HttpStatus.OK);
+        return MessageResponse.response(Reason.SUCCESS_UPDATE.getValue(), bookDto, null, HttpStatus.OK);
+    }
 }
