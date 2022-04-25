@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
@@ -14,6 +15,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Set;
 
+@Slf4j
 @OpenAPIDefinition(info = @Info(title = "BookStore API", version = "1.0", description = "authentication service for BookStore"))
 @SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer")
 @SpringBootApplication(exclude= {UserDetailsServiceAutoConfiguration.class})
@@ -33,7 +35,8 @@ public class BookAppAuthApplication {
                 .roles(Set.of(RoleEntity.builder().roleName("ADMIN").status(true).build()))
                 .build();
 
-        user.save(userEntity);
+        try{ user.save(userEntity); }
+        catch (Exception e){ log.error("In main save default user: " + e.getMessage()); }
     }
 
 }
