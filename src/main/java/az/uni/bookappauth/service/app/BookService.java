@@ -82,13 +82,6 @@ public class BookService {
             return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-//        BookEntity bookEntity = BookEntity.builder()
-//                .bookName(book.getBookName())
-//                .pageCount(book.getPageCount())
-//                .publisherId(book.getPublisherId())
-//                .authors(authorMapper.authorsDtoToAuthors(book.getAuthors()))
-//                .build();
-
         BookEntity bookEntity = new BookEntity();
         bookEntity.setBookName(book.getBookName());
         bookEntity.setPageCount(book.getPageCount());
@@ -166,8 +159,9 @@ public class BookService {
         bookEntity.get().setPageCount(book.getPageCount());
         bookEntity.get().setPublisherId(userId);
 
-        List<AuthorEntity> authors = bookEntity.get().getAuthors();
+        List<AuthorEntity> authors = new ArrayList<>(bookEntity.get().getAuthors());
         bookEntity.get().getAuthors().removeAll(authors);
+
         book.getAuthors().forEach(e -> bookEntity.get().addAuthor(authorMapper.authorDtoToAuthor(e)));
 
         bookRepository.save(bookEntity.get());
