@@ -8,7 +8,6 @@ import az.uni.bookappauth.entity.RoleEntity;
 import az.uni.bookappauth.entity.UserEntity;
 import az.uni.bookappauth.mapper.AuthorMapper;
 import az.uni.bookappauth.mapper.BookMapper;
-import az.uni.bookappauth.repository.AuthorRepository;
 import az.uni.bookappauth.repository.BookRepository;
 import az.uni.bookappauth.repository.UserRepository;
 import az.uni.bookappauth.response.MessageResponse;
@@ -35,7 +34,6 @@ public class BookService {
     private final Logger log = LoggerFactory.getLogger(BookService.class);
 
     private final BookRepository bookRepository;
-    private final AuthorRepository authorRepository;
     private final UserRepository userRepository;
     private final BookMapper bookMapper;
     private final AuthorMapper authorMapper;
@@ -159,9 +157,8 @@ public class BookService {
         bookEntity.get().setPageCount(book.getPageCount());
         bookEntity.get().setPublisherId(userId);
 
-        List<AuthorEntity> authors = new ArrayList<>(bookEntity.get().getAuthors());
-        bookEntity.get().getAuthors().removeAll(authors);
 
+        bookEntity.get().getAuthors().forEach(e -> bookEntity.get().removeAuthor(e));
         book.getAuthors().forEach(e -> bookEntity.get().addAuthor(authorMapper.authorDtoToAuthor(e)));
 
         bookRepository.save(bookEntity.get());

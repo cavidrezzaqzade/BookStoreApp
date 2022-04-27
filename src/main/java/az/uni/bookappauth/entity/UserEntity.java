@@ -55,25 +55,26 @@ public class UserEntity {
             @JoinColumn(name="role_id",referencedColumnName = "id"))
     private Set<RoleEntity> roles = new HashSet<>();
 
-//    public void addRole(RoleEntity roleEntity) {
-//        roles.add(roleEntity);
-//        roleEntity.getUsers().add(this);
-//    }
-//
-//    public void removeRole(RoleEntity reportFilesEntity) {
-//        roles.remove(reportFilesEntity);
-//        reportFilesEntity.getUsers().remove(this);
-//    }
+    public void addRole(RoleEntity roleEntity) {
+        roles.add(roleEntity);
+        roleEntity.getUsers().add(this);
+    }
 
-//    @Override
-//    public boolean equals(Object obj) {
-//        if(this == obj) return true;
-//        if(!(obj instanceof UserEntity)) return false;
-//        return id != null && id.equals(((UserEntity) obj).getId());
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return getClass().hashCode();
-//    }
+    public void removeRole(RoleEntity roleEntity) {
+        roles.remove(roleEntity);
+        roleEntity.getUsers().remove(this);
+
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj) return true;
+        if(!(obj instanceof UserEntity)) return false;
+        return id != null && id.equals(((UserEntity) obj).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

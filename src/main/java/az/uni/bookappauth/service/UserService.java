@@ -30,10 +30,10 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
 
-    public Optional<User> getByLogin(@NonNull String login) {
+    public Optional<User> getByLogin(@NonNull String login) {//username ve login equalsIgnoreCase() ile yoxlanilir
         log.info("UserService/getByLogin method started");
         UserEntity user = userRepository.findByUsernameIgnoreCase(login).stream()
-                .filter(u -> login.equals(u.getUsername()))
+                .filter(u -> login.equalsIgnoreCase(u.getUsername()))
                 .findFirst().orElseThrow(() -> new AuthException("User is not found"));
         log.info("UserService/getByLogin method  -> status:" + HttpStatus.OK);
         return entityToDtoLogin(user);
@@ -126,14 +126,22 @@ public class UserService {
         userEntity.get().setName(user.getFirstname());
         userEntity.get().setSurname(user.getLastname());
 
-        Set<RoleEntity> remove = new HashSet<>(userEntity.get().getRoles());
-        userEntity.get().getRoles().removeAll(remove);
+        userEntity.get().getRoles().forEach(e -> userEntity.get().removeRole(e));
 
-        Set<RoleEntity> add = new HashSet<>(userEntity.get().getRoles());
+        Set<RoleEntity> add = new HashSet<>();
         for(Long id : user.getRoles()){
-            add.add(roleRepository.findById(id).get());
+            RoleEntity role = new RoleEntity();
+            role.setId(id);
+
+            Set<UserEntity> users = new HashSet<>();
+            users.add(userEntity.get());
+
+            role.setUsers(users);
+            add.add(role);
+         //   userEntity.get().addRole(role);
         }
-        userEntity.get().getRoles().addAll(add);
+
+        userEntity.get().setRoles(add);
 
         userRepository.save(userEntity.get());
         UserDto userDto = userMapper.userToUserDto(userEntity.get());
