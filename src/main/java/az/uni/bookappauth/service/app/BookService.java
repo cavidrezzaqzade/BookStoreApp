@@ -1,5 +1,6 @@
 package az.uni.bookappauth.service.app;
 
+import az.uni.bookappauth.domain.app.AuthorDto;
 import az.uni.bookappauth.domain.app.BookDto;
 import az.uni.bookappauth.domain.app.SearchBookDto;
 import az.uni.bookappauth.entity.AuthorEntity;
@@ -86,8 +87,8 @@ public class BookService {
         bookEntity.setPublisherId(userRepository.findByUsernameIgnoreCase(auth.getPrincipal().toString()).get().getId());
 
         book.getAuthors().forEach(e -> bookEntity.addAuthor(authorMapper.authorDtoToAuthor(e)));
-
         bookRepository.save(bookEntity);
+
         BookDto bookDto = bookMapper.bookToBookDto(bookEntity);
         log.info("BookService/addBook method ended -> status:" + HttpStatus.OK);
         return MessageResponse.response(Reason.SUCCESS_ADD.getValue(), bookDto, null, HttpStatus.OK);
@@ -146,7 +147,7 @@ public class BookService {
         if(bookEntity.isEmpty())
             map.put("bookId", "data does not exist");
         Long userId = userRepository.findByUsernameIgnoreCase(auth.getPrincipal().toString()).get().getId();
-        if(bookEntity.get().getPublisherId() != userId)
+        if(!Objects.equals(bookEntity.get().getPublisherId(), userId))
             map.put("bookId", "publisher is not owner this book");
         if(!map.isEmpty()) {
             log.error("BookService/updateBook method ended with bookId doesn't exist -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
@@ -157,9 +158,15 @@ public class BookService {
         bookEntity.get().setPageCount(book.getPageCount());
         bookEntity.get().setPublisherId(userId);
 
+        bookEntity.get().getAuthors().clear();
 
-        bookEntity.get().getAuthors().forEach(e -> bookEntity.get().removeAuthor(e));
-        book.getAuthors().forEach(e -> bookEntity.get().addAuthor(authorMapper.authorDtoToAuthor(e)));
+        for (AuthorDto dto : book.getAuthors()) {
+            AuthorEntity author = new AuthorEntity();
+            author.setId(dto.getId());
+            author.setName(dto.getName());
+
+            bookEntity.get().addAuthor(author);
+        }
 
         bookRepository.save(bookEntity.get());
         BookDto bookDto = bookMapper.bookToBookDto(bookEntity.get());

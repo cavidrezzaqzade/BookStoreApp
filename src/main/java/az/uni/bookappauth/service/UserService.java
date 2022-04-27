@@ -83,12 +83,11 @@ public class UserService {
         userEntity.setName(user.getFirstname());
         userEntity.setSurname(user.getLastname());
 
-        Set<RoleEntity> roleSet = new HashSet<>();
-        for (Long roleId : user.getRoles()){
-            RoleEntity role = roleRepository.findById(roleId).get();
-            roleSet.add(role);
+        for (Long id : user.getRoles()){
+            RoleEntity role = new RoleEntity();
+            role.setId(id);
+            userEntity.addRole(role);
         }
-        userEntity.setRoles(roleSet);
 
         userRepository.save(userEntity);
         UserDto userDto = userMapper.userToUserDto(userEntity);
@@ -126,22 +125,13 @@ public class UserService {
         userEntity.get().setName(user.getFirstname());
         userEntity.get().setSurname(user.getLastname());
 
-        userEntity.get().getRoles().forEach(e -> userEntity.get().removeRole(e));
+        userEntity.get().getRoles().clear();
 
-        Set<RoleEntity> add = new HashSet<>();
         for(Long id : user.getRoles()){
             RoleEntity role = new RoleEntity();
             role.setId(id);
-
-            Set<UserEntity> users = new HashSet<>();
-            users.add(userEntity.get());
-
-            role.setUsers(users);
-            add.add(role);
-         //   userEntity.get().addRole(role);
+            userEntity.get().addRole(role);
         }
-
-        userEntity.get().setRoles(add);
 
         userRepository.save(userEntity.get());
         UserDto userDto = userMapper.userToUserDto(userEntity.get());
@@ -170,9 +160,11 @@ public class UserService {
     }
 
     private boolean CheckContains(List<Long> userRolesIds,List<Long> allRolesIds){
-        boolean check = true;
-        if(!allRolesIds.containsAll(userRolesIds))
-            check = false;
-        return check;
+//        boolean check = true;
+//        if(!allRolesIds.containsAll(userRolesIds))
+//            check = false;
+//        return check;
+        return allRolesIds.containsAll(userRolesIds);
+
     }
 }

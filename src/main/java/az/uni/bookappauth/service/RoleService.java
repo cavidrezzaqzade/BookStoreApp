@@ -97,6 +97,7 @@ public class RoleService {
         }
         roleEntity.get().setRoleName(role.getRoleName().toUpperCase(Locale.ROOT));
         roleRepository.save(roleEntity.get());
+
         RoleDto dto = roleMapper.roleToRoleDto(roleEntity.get());
         log.info("RoleService/updateRole method ended -> status:" + HttpStatus.OK);
         return MessageResponse.response(Reason.SUCCESS_UPDATE.getValue(), dto, null, HttpStatus.OK);

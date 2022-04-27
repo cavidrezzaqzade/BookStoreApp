@@ -44,10 +44,10 @@ public class UserEntity {
     @UpdateTimestamp
     private LocalDateTime updated;
 
-    @ManyToMany(cascade = {
+    @ManyToMany(/*cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
-    }, fetch = FetchType.EAGER)
+    }, fetch = FetchType.EAGER*/)
     @JoinTable(name="users_roles",
             joinColumns =
             @JoinColumn(name="user_id",referencedColumnName = "id"),

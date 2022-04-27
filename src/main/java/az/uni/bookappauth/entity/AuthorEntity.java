@@ -7,7 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Getter
+@Getter()
 @Setter
 @Entity
 @Builder
@@ -23,7 +23,7 @@ public class AuthorEntity {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Column
+    @Column(updatable = false)
     @CreationTimestamp
     private LocalDateTime created;
 
