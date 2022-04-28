@@ -29,35 +29,28 @@ class BookRepositoryTest {
 
     @DisplayName("check exists by upper BookName")
     @Test
-    void givenUpperBookNameWhenExistsThenTrue() {
+    void givenUpperBookName_WhenExists_ThenTrue() {
         boolean existsByBookName = bookRepository.existsByBookNameIgnoreCase("GO1984");
         assertThat(existsByBookName).isTrue();
     }
 
     @DisplayName("check exists by lower BookName")
     @Test
-    void givenLowerBookNameWhenExistsThenTrue() {
+    void givenLowerBookName_WhenExists_ThenTrue() {
         boolean existsByBookName = bookRepository.existsByBookNameIgnoreCase("go1984");
         assertThat(existsByBookName).isTrue();
     }
 
     @DisplayName("check does not exist by BookName")
     @Test
-    void givenBookNameWhenExistsThenFalse() {
+    void givenBookName_WhenExists_ThenFalse() {
         boolean existsByBookName = bookRepository.existsByBookNameIgnoreCase("1984GO");
         assertThat(existsByBookName).isFalse();
     }
 
-//    @DisplayName("check does not exist by lower BookName")
-//    @Test
-//    void givenLowerBookNameWhenExistsThenFalse() {
-//        boolean existsByBookName = bookRepository.existsByBookNameIgnoreCase("1984go");
-//        assertThat(existsByBookName).isFalse();
-//    }
-
     @DisplayName("check finds by PublisherId")
     @Test
-    void givenPublisherIdWhenFindsThenTrue() {
+    void givenPublisherId_WhenFinds_ThenTrue() {
         List<BookEntity> book = bookRepository.findByPublisherId(1L);
         assertEquals(1, book.size());
         assertEquals(1L,book.get(0).getId());
@@ -65,7 +58,7 @@ class BookRepositoryTest {
 
     @DisplayName("check does not find by PublisherId")
     @Test
-    void givenPublisherIdWhenDoesNotFindThenFalse() {
+    void givenPublisherId_WhenDoesNotFind_ThenFalse() {
         List<BookEntity> book = bookRepository.findByPublisherId(2L);
         assertEquals(0, book.size());
     }

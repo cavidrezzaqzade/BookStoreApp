@@ -165,6 +165,5 @@ public class UserService {
 //            check = false;
 //        return check;
         return allRolesIds.containsAll(userRolesIds);
-
     }
 }

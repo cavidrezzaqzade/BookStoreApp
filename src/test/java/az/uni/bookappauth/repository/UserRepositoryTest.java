@@ -42,35 +42,30 @@ class UserRepositoryTest {
         userRepository.save(user);
     }
 
-//    @AfterEach
-//    void tearDown() {
-//        userRepository.deleteAll();
-//    }
-
     @DisplayName("check exists by upper username")
     @Test
-    void givenUpperUsernameWhenExistsThenTrue() {
+    void givenUpperUsername_WhenExists_ThenTrue() {
         boolean checkIfExists = userRepository.existsByUsernameIgnoreCase("CAViD");//I
         assertThat(checkIfExists).isTrue();
     }
 
     @DisplayName("check exists by lower username")
     @Test
-    void givenLowerUsernameWhenExistsThenTrue() {
+    void givenLowerUsername_WhenExists_ThenTrue() {
         boolean checkIfExists = userRepository.existsByUsernameIgnoreCase("cavid");
         assertThat(checkIfExists).isTrue();
     }
 
     @DisplayName("check does not exist by upper username")
     @Test
-    void givenUpperUsernameWhenDoesNotExistThenFalse() {
+    void givenUpperUsername_WhenDoesNotExist_ThenFalse() {
         boolean checkIfExists = userRepository.existsByUsernameIgnoreCase("CavaD");
         assertThat(checkIfExists).isFalse();
     }
 
     @DisplayName("check does not exist by lower username")
     @Test
-    void givenLowerUsernameWhenDoesNotExistThenFalse() {
+    void givenLowerUsername_WhenDoesNotExist_ThenFalse() {
         boolean checkIfExists = userRepository.existsByUsernameIgnoreCase("cavad");
         assertThat(checkIfExists).isFalse();
     }
@@ -79,28 +74,28 @@ class UserRepositoryTest {
 
     @DisplayName("check finds by username")
     @Test
-    void givenLowerUsernameWhenFindsThenTrue() {
+    void givenLowerUsername_WhenFinds_ThenTrue() {
         Optional<UserEntity> user = userRepository.findByUsernameIgnoreCase("cavid");
         assertTrue(user.isPresent());
     }
 
     @DisplayName("check finds by username")
     @Test
-    void givenUpperUsernameWhenFindsThenTrue() {
+    void givenUpperUsername_WhenFinds_ThenTrue() {
         Optional<UserEntity> user = userRepository.findByUsernameIgnoreCase("CAvid");
         assertTrue(user.isPresent());
     }
 
     @DisplayName("check does not find by username")
     @Test
-    void givenLowerUsernameWhenDoesNotFindThenFalse() {
+    void givenLowerUsername_WhenDoesNotFind_ThenFalse() {
         Optional<UserEntity> user = userRepository.findByUsernameIgnoreCase("cavad");
         assertTrue(user.isEmpty());
     }
 
     @DisplayName("check does not find by username")
     @Test
-    void givenUpperUsernameWhenDoesNotFindThenFalse() {
+    void givenUpperUsername_WhenDoesNotFind_ThenFalse() {
         Optional<UserEntity> user = userRepository.findByUsernameIgnoreCase("caVad");
         assertTrue(user.isEmpty());
     }

@@ -30,21 +30,21 @@ class RoleRepositoryTest {
 
     @DisplayName("check exists by upper RoleName")
     @Test
-    void givenUpperRoleNameWhenExistsThenTrue() {
+    void givenUpperRoleName_WhenExists_ThenTrue() {
         boolean existsByRoleName = repository.existsByRoleNameIgnoreCase("AdmiN");
         assertThat(existsByRoleName).isTrue();
     }
 
     @DisplayName("check exists by lower RoleName")
     @Test
-    void givenLowerRoleNameWhenExistsThenTrue() {
+    void givenLowerRoleName_WhenExists_ThenTrue() {
         boolean existsByRoleName = repository.existsByRoleNameIgnoreCase("admin");
         assertThat(existsByRoleName).isTrue();
     }
 
     @DisplayName("check does not exist by RoleName")
     @Test
-    void givenRoleNameWhenDoesNotExistThenTrue() {
+    void givenRoleName_WhenDoesNotExist_ThenTrue() {
         boolean existsByRoleName = repository.existsByRoleNameIgnoreCase("admi");
         assertThat(existsByRoleName).isFalse();
     }
@@ -53,7 +53,7 @@ class RoleRepositoryTest {
 
     @DisplayName("check finds by upper RoleName")
     @Test
-    void givenUpperRoleNameWhenFindsThenTrue() {
+    void givenUpperRoleName_WhenFinds_ThenTrue() {
         Optional<RoleEntity> role = repository.findByRoleNameIgnoreCase("ADmin");
         if (role.isPresent())
             assertEquals(role.get().getRoleName(), ROLE_ENTITY.getRoleName());
@@ -63,7 +63,7 @@ class RoleRepositoryTest {
 
     @DisplayName("check finds by lower RoleName")
     @Test
-    void givenLowerRoleNameWhenFindsThenTrue() {
+    void givenLowerRoleName_WhenFinds_ThenTrue() {
         Optional<RoleEntity> role = repository.findByRoleNameIgnoreCase("admin");
         if (role.isPresent())
             assertEquals(role.get().getRoleName(), ROLE_ENTITY.getRoleName());
@@ -73,7 +73,7 @@ class RoleRepositoryTest {
 
     @DisplayName("check does not find by RoleName")
     @Test
-    void givenRoleNameWhenDoesNotFindThenTrue() {
+    void givenRoleName_WhenDoesNotFind_ThenTrue() {
         Optional<RoleEntity> role = repository.findByRoleNameIgnoreCase("amdin");
         assertThat(role.isEmpty()).isTrue();
     }
@@ -82,7 +82,7 @@ class RoleRepositoryTest {
 
     @DisplayName("check finds all id's")
     @Test
-    void givenNoneWhenFindsAllIdsThenTrue() {
+    void givenNone_WhenFindsAllIds_ThenTrue() {
         RoleEntity role = RoleEntity.builder()
                 .roleName("User")
                 .build();
@@ -95,7 +95,7 @@ class RoleRepositoryTest {
 
     @DisplayName("check does not find all id's")
     @Test
-    void givenNoneWhenDoesNotFindAllIdsThenFalse() {
+    void givenNone_WhenDoesNotFindAllIds_ThenFalse() {
         RoleEntity role = RoleEntity.builder()
                 .roleName("User")
                 .build();
