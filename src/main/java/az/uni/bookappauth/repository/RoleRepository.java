@@ -14,9 +14,6 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     Optional<RoleEntity> findByRoleNameIgnoreCase(String roleName);
 
-    @Query(value = "select exists(select * from users_roles ur where ur.role_id = :id)", nativeQuery = true)
-    boolean checkForeignKeyExists(Long id);
-
     @Query(value = "select r.id from roles r", nativeQuery = true)
     List<Long> findAllIds();
 

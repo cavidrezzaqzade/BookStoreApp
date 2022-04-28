@@ -41,25 +41,26 @@ class BookRepositoryTest {
         assertThat(existsByBookName).isTrue();
     }
 
-    @DisplayName("check does not exist by upper BookName")
+    @DisplayName("check does not exist by BookName")
     @Test
-    void givenUpperBookNameWhenExistsThenFalse() {
+    void givenBookNameWhenExistsThenFalse() {
         boolean existsByBookName = bookRepository.existsByBookNameIgnoreCase("1984GO");
         assertThat(existsByBookName).isFalse();
     }
 
-    @DisplayName("check does not exist by lower BookName")
-    @Test
-    void givenLowerBookNameWhenExistsThenFalse() {
-        boolean existsByBookName = bookRepository.existsByBookNameIgnoreCase("1984go");
-        assertThat(existsByBookName).isFalse();
-    }
+//    @DisplayName("check does not exist by lower BookName")
+//    @Test
+//    void givenLowerBookNameWhenExistsThenFalse() {
+//        boolean existsByBookName = bookRepository.existsByBookNameIgnoreCase("1984go");
+//        assertThat(existsByBookName).isFalse();
+//    }
 
     @DisplayName("check finds by PublisherId")
     @Test
     void givenPublisherIdWhenFindsThenTrue() {
         List<BookEntity> book = bookRepository.findByPublisherId(1L);
         assertEquals(1, book.size());
+        assertEquals(1L,book.get(0).getId());
     }
 
     @DisplayName("check does not find by PublisherId")

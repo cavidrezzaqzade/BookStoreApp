@@ -55,7 +55,6 @@ public class RoleService {
         Map<String, String> map = new HashMap<>();
 
         Optional<RoleEntity> roleEntity = roleRepository.findById(roleId);
-        boolean checkForeignKeyViolation = roleRepository.checkForeignKeyExists(roleId);
         if(roleEntity.isEmpty())
             map.put("roleId", "role doesn't exist");
         if(!map.isEmpty()){
@@ -63,7 +62,7 @@ public class RoleService {
             return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        if(checkForeignKeyViolation)
+        if(!roleEntity.get().getUsers().isEmpty())
             map.put("roleId", "foreign key constraint viaolation");
         if(!map.isEmpty()){
             log.error("RoleService/deleteRole method ended with roleId fk violation -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);

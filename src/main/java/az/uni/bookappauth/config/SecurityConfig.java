@@ -33,15 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-//        http = http
-//                .exceptionHandling()
-//                .authenticationEntryPoint(
-//                        (request, response, ex) -> response.sendError(
-//                                HttpServletResponse.SC_FORBIDDEN,
-//                                ex.getMessage()
-//                        )
-//                )
-//                .and()
+
                 .authorizeRequests()
                 .antMatchers("/auth/login", "/auth/token").permitAll()
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/*").permitAll()
