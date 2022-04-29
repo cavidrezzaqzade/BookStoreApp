@@ -3,6 +3,7 @@ package az.uni.bookappauth.domain;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter
@@ -16,6 +17,7 @@ public class RoleDto {
     private Long id;
 
     @NotEmpty(message = "role boş ola bilməz")
+//    @NotNull(message = "{javax.validation.constraints.NotNull.message}")
     private String roleName;
 
     private boolean status;

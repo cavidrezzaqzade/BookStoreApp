@@ -35,6 +35,7 @@ public class RoleService {
         }
         RoleEntity roleEntity = new RoleEntity();
         roleEntity.setRoleName(role.getRoleName().toUpperCase(Locale.ROOT));
+//        RoleEntity roleEntity = roleMapper.roleDtoToRole(role);
         roleRepository.save(roleEntity);
 
         RoleDto dto = roleMapper.roleToRoleDto(roleEntity);
