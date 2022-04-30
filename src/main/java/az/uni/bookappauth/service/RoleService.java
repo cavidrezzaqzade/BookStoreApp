@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 
 @Service
@@ -57,14 +56,14 @@ public class RoleService {
 
         Optional<RoleEntity> roleEntity = roleRepository.findById(roleId);
         if(roleEntity.isEmpty())
-            map.put("roleId", "role doesn't exist");
+            map.put("roleId", "role does not exist");
         if(!map.isEmpty()){
             log.error("RoleService/deleteRole method ended with roleId doesn't exists -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
             return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         if(!roleEntity.get().getUsers().isEmpty())
-            map.put("roleId", "foreign key constraint viaolation");
+            map.put("roleId", "foreign key constraint violation");
         if(!map.isEmpty()){
             log.error("RoleService/deleteRole method ended with roleId fk violation -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
             return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -82,7 +81,7 @@ public class RoleService {
         Optional<RoleEntity> roleEntity = roleRepository.findById(roleId);
 
         if(roleEntity.isEmpty())
-            map.put("roleId", "role doesn't exist");
+            map.put("roleId", "role does not exist");
         if(!map.isEmpty()) {
             log.error("RoleService/updateRole method ended with roleId doesn't exists -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
             return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);

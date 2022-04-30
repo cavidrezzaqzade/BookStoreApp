@@ -5,8 +5,11 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,13 +22,22 @@ class RoleRepositoryTest {
 
     private static final RoleEntity ROLE_ENTITY = RoleEntity.builder().roleName("Admin").build();
 
+    private List<Long> roleIds = Collections.emptyList();
+
     @BeforeAll
     void setUpAll(){
         RoleEntity role = RoleEntity.builder()
                 .roleName("Admin")
                 .build();
 
-        repository.save(role);
+        RoleEntity role2 = RoleEntity.builder()
+                .roleName("User")
+                .build();
+
+        List<RoleEntity> roles = repository.saveAll(List.of(role, role2));
+        roleIds = roles.stream()
+                .map(e -> e.getId())
+                .collect(Collectors.toList());
     }
 
     @DisplayName("check exists by upper RoleName")
@@ -83,26 +95,14 @@ class RoleRepositoryTest {
     @DisplayName("check finds all id's")
     @Test
     void givenNone_WhenFindsAllIds_ThenTrue() {
-        RoleEntity role = RoleEntity.builder()
-                .roleName("User")
-                .build();
-        repository.save(role);
-
         List<Long> ids = repository.findAllIds();
-
-        assertEquals(ids, Arrays.asList(1L, 2L));
+        assertEquals(ids, roleIds);
     }
 
     @DisplayName("check does not find all id's")
     @Test
     void givenNone_WhenDoesNotFindAllIds_ThenFalse() {
-        RoleEntity role = RoleEntity.builder()
-                .roleName("User")
-                .build();
-        repository.save(role);
-
         List<Long> ids = repository.findAllIds();
-
-        assertNotEquals(ids, Arrays.asList(3L, 4L));
+        assertNotEquals(ids, Arrays.asList(30L, 40L));
     }
 }

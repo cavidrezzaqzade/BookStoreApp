@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class UserRepositoryTest {
 
     /**
-     * -> We can also say a book
+     * -> We can also say a Integration test
      * -> Because jpa repositories inferred and does not need to be unit tested
      * -> Components will be automatically configured to point to an embedded,
      *    in-memory database instead of the “real” database we might have configured
@@ -39,6 +40,7 @@ class UserRepositoryTest {
                 .name("c")
                 .surname("r")
                 .build();
+
         userRepository.save(user);
     }
 
