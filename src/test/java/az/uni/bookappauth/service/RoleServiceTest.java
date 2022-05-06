@@ -153,14 +153,13 @@ class RoleServiceTest {
         //given
         List<RoleEntity> roles = List.of(roleEntity, roleEntity2);
         List<RoleDto> roleDtos = List.of(roleDto, roleDto2);
-
-        //when
         given(roleRepository.findAll()).willReturn(roles);
         given(roleMapper.rolesToRoleDtos(roles)).willReturn(roleDtos);
 
-        //then
+        //when
         ResponseEntity<?> a = roleService.getRoles();
-
+        
+        //then
         assertEquals(a, responseModelDTOList);
         verify(roleRepository).findAll();
     }
@@ -169,13 +168,13 @@ class RoleServiceTest {
     @Test
     void givenNone_WhenGetRoles_ThenEmptyListOK() {
         //given
-        //when
         given(roleRepository.findAll()).willReturn(Collections.emptyList());
         given(roleMapper.rolesToRoleDtos(Collections.emptyList())).willReturn(Collections.emptyList());
-
-        //then
+        
+        //when
         ResponseEntity<?> a = roleService.getRoles();
 
+        //then
         assertEquals(a, responseModelDTOEmptyList);
         verify(roleRepository).findAll();
     }

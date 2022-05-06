@@ -6,6 +6,7 @@ import io.jsonwebtoken.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -15,6 +16,7 @@ import java.util.Date;
 
 @Slf4j
 @Component
+@PropertySource(value = {"file:src/main/resources/application.properties"})
 public class JwtProvider {
 
     private final String jwtAccessSecret;

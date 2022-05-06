@@ -13,7 +13,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Tag(name = "Role", description = "the role API")
 public class RoleController {
@@ -42,8 +42,8 @@ public class RoleController {
     }
 
     @Operation(summary = "get role", description = "get all rows", tags = {"Role"}, security = @SecurityRequirement(name = "bearerAuth"))
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("roles")
+    //@PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/roles")
     public ResponseEntity<?> getRoles() {
         return roleService.getRoles();
     }

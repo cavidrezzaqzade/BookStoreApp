@@ -83,11 +83,12 @@ public class UserService {
         userEntity.setName(user.getFirstname());
         userEntity.setSurname(user.getLastname());
 
-        for (Long id : user.getRoles()){
-            RoleEntity role = new RoleEntity();
-            role.setId(id);
-            userEntity.addRole(role);
-        }
+        if(user.getRoles() != null)
+            for (Long id : user.getRoles()){
+                RoleEntity role = new RoleEntity();
+                role.setId(id);
+                userEntity.addRole(role);
+            }
 
         userRepository.save(userEntity);
         UserDto userDto = userMapper.userToUserDto(userEntity);
@@ -160,10 +161,6 @@ public class UserService {
     }
 
     private boolean CheckContains(List<Long> userRolesIds,List<Long> allRolesIds){
-//        boolean check = true;
-//        if(!allRolesIds.containsAll(userRolesIds))
-//            check = false;
-//        return check;
         return allRolesIds.containsAll(userRolesIds);
     }
 }

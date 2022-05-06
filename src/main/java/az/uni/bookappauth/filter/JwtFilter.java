@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -24,16 +25,22 @@ import java.io.IOException;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class JwtFilter extends GenericFilterBean {
 
     private static final String AUTHORIZATION = "Authorization";
 
+    @Autowired
+    public JwtFilter(JwtProvider jwtProvider,@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+        this.jwtProvider = jwtProvider;
+        this.resolver = resolver;
+    }
+
     private final JwtProvider jwtProvider;
 
-    @Autowired
-    @Qualifier("handlerExceptionResolver")
-    HandlerExceptionResolver resolver;
+//    @Autowired
+//    @Qualifier("handlerExceptionResolver")
+    private final HandlerExceptionResolver resolver;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain fc)
@@ -50,17 +57,13 @@ public class JwtFilter extends GenericFilterBean {
                 jwtInfoToken.setAuthenticated(true);
                 SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
             }
-        }catch (JwtException e){
+        } catch (Exception e){
             log.error(e.getMessage());
             resolver.resolveException(req, res, null, e);
 //            res.sendError(HttpServletResponse.SC_FORBIDDEN, "invalid token from filter");
             return;
-        }catch (Exception e){
-            log.error(e.getMessage());
-            resolver.resolveException(req, res, null, e);
-//            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "undefined error occured");
-            return;
-        }
+        }//            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "undefined error occured");
+
         fc.doFilter(request, response);
     }
 
