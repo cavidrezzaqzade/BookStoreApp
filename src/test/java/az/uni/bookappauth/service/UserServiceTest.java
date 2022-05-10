@@ -1,16 +1,19 @@
 package az.uni.bookappauth.service;
 
+import az.uni.bookappauth.domain.Role;
 import az.uni.bookappauth.domain.RoleDto;
+import az.uni.bookappauth.domain.User;
 import az.uni.bookappauth.domain.UserDto;
 import az.uni.bookappauth.entity.RoleEntity;
 import az.uni.bookappauth.entity.UserEntity;
-import az.uni.bookappauth.mapper.RoleMapper;
+import az.uni.bookappauth.exception.AuthException;
 import az.uni.bookappauth.mapper.UserMapper;
+import az.uni.bookappauth.repository.RoleRepository;
 import az.uni.bookappauth.repository.UserRepository;
 import az.uni.bookappauth.response.MessageResponse;
 import az.uni.bookappauth.response.Reason;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,16 +23,12 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import java.util.*;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -37,32 +36,37 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private RoleRepository roleRepository;
+
     @InjectMocks
     private UserService userService;
 
     @Spy
     private UserMapper userMapper;
 
+    @Spy
+    private Converter converter;
+
     private static UserEntity userEntity;
     private static UserEntity userEntity2;
+    private static UserEntity userEntity3;
     private static UserDto userDto;
     private static UserDto userDto2;
-
-    private static ResponseEntity<?> responseModelDTO;
-    private static ResponseEntity<?> responseModelDTO2;
-    private static ResponseEntity<?> responseModelDTOUnprocessableAddRole;
-    private static ResponseEntity<?> responseModelDTOUnprocessableFk;
-    private static ResponseEntity<?> responseModelDTOUnprocessableDoesNotExist;
-    private static ResponseEntity<?> responseModelDTOUnprocessableAlreadyExist;
-    private static ResponseEntity<?> responseModelDTOList;
-    private static ResponseEntity<?> responseModelDTOEmptyList;
+    private static User user;
 
     @BeforeAll
     static void setUpAll(){
+
+        Set<RoleEntity> roleEntities = new HashSet<>();
+        roleEntities.add(RoleEntity.builder().id(1L).roleName("Admin").build());
+        roleEntities.add(RoleEntity.builder().id(2L).roleName("User").build());
+
         userEntity = UserEntity.builder()
                 .id(1L)
                 .username("cavid")
                 .password("12345")
+                .roles(roleEntities)
                 .build();
 
         userEntity2 = UserEntity.builder()
@@ -71,10 +75,17 @@ class UserServiceTest {
                 .password("12345")
                 .build();
 
+        //for unique username check
+        userEntity3 = UserEntity.builder()
+                .id(3L)
+                .username("cavid")
+                .password("12345")
+                .build();
 
         userDto = UserDto.builder()
                 .username("cavid")
                 .password("12345")
+                .roles(List.of(1L, 2L))
                 .build();
 
         userDto2 = UserDto.builder()
@@ -82,35 +93,59 @@ class UserServiceTest {
                 .password("12345")
                 .build();
 
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.builder().roleName("ADMIN").build());
+        roles.add(Role.builder().roleName("USER").build());
 
+        user = User.builder()
+                .login("cavid")
+                .password("12345")
+                .roles(roles)
+                .build();
 
-
-//        responseModelDTOList = MessageResponse.response(Reason.SUCCESS_ADD.getValue(), List.of(userDto, userDto2), null, HttpStatus.OK);
-//        responseModelDTO = MessageResponse.response(Reason.SUCCESS_ADD.getValue(), roleDto, null, HttpStatus.OK);
-//        responseModelDTO2 = MessageResponse.response(Reason.SUCCESS_ADD.getValue(), roleDto2, null, HttpStatus.OK);
-//        responseModelDTOEmptyList = MessageResponse.response(Reason.SUCCESS_GET.getValue(), List.of(), null, HttpStatus.OK);
-//
-//        Map<String, String> map1 = new HashMap<>();
-//        map1.put("roleName", "already exists");
-//        responseModelDTOUnprocessableAddRole = MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map1, HttpStatus.UNPROCESSABLE_ENTITY);
-//
-//        Map<String, String> map2 = new HashMap<>();
-//        map2.put("roleId", "foreign key constraint violation");
-//        responseModelDTOUnprocessableFk = MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map2, HttpStatus.UNPROCESSABLE_ENTITY);
-//
-//        Map<String, String> map3 = new HashMap<>();
-//        map3.put("roleId", "role does not exist");
-//        responseModelDTOUnprocessableDoesNotExist = MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map3, HttpStatus.UNPROCESSABLE_ENTITY);
-//
-//        Map<String, String> map4 = new HashMap<>();
-//        map4.put("roleName", "roleName already exists");
-//        responseModelDTOUnprocessableAlreadyExist = MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map4, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
+    @DisplayName("check getByLogin ok")
     @Test
-    void getByLogin() {
+    void givenLowerUserName_WhenGetByLogin_ThenOk() {
+        //given
+        String userName = "cavid";
+        given(userRepository.findByUsernameIgnoreCase(userName)).willReturn(Optional.of(userEntity));
+        given(converter.entityToDtoLogin(userEntity)).willReturn(Optional.of(user));
 
+        //when
+        Optional<User> res = userService.getByLogin(userName);
+
+        //then
+        assertEquals(res, Optional.of(user));
+        verify(userRepository, times(1)).findByUsernameIgnoreCase(userName);
+        verify(converter, times(1)).entityToDtoLogin(userEntity);
     }
+
+    @DisplayName("check getByLogin throws authException")
+    @Test
+    void givenLowerUserName_WhenGetByLogin_ThenAuthException() {
+        //given
+        String userName = "cavid";
+        given(userRepository.findByUsernameIgnoreCase(userName)).willReturn(Optional.of(userEntity2));
+
+        //when
+        Assertions.assertThrows(AuthException.class, () -> userService.getByLogin(userName));
+
+        //then
+        verify(userRepository, times(1)).findByUsernameIgnoreCase(userName);
+        verify(converter, never()).entityToDtoLogin(userEntity);
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * we should not test private methods.
+     */
+//    @DisplayName("check entityToDtoLogin ok")
+//    @Test
+//    void givenUserEntity_WhenEntityToDtoLogin_ThenUser() {
+//    }
 
     //////////////////////////////////////////////////////////////////////////////
 
@@ -186,13 +221,126 @@ class UserServiceTest {
 
     //////////////////////////////////////////////////////////////////////////////
 
+    @DisplayName("check update user by id not found")
     @Test
-    void updateUser() {
+    void givenUserDtoAndUserId_WhenUpdateUser_ThenNotFound() {
+        //given
+        Map<String, String> map = new HashMap<>();
+        map.put("userId", "data doesn't exist");
+        Long userId = 1L;
+        given(userRepository.findById(userId)).willReturn(Optional.empty());
 
+        //when
+        ResponseEntity<?> responseOK = userService.updateUser(userDto, userId);
+
+        //then
+        assertThat(responseOK).isNotNull();
+        assertThat(responseOK).isEqualTo(MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY));
+        verify(userRepository, times(1)).findById(userId);
     }
+
+    @DisplayName("check update user by id not found")
+    @Test
+    void givenUserDtoAndUserId_WhenUpdateUser_ThenOk() {
+        //given
+        Long userId = 1L;
+        given(userRepository.findById(userId)).willReturn(Optional.of(userEntity));
+        given(roleRepository.findAllIds()).willReturn(List.of(1L,2L));
+        given(userRepository.findByUsernameIgnoreCase("cavid")).willReturn(Optional.of(userEntity));
+        given(userRepository.save(any(UserEntity.class))).willReturn(userEntity);
+        given(userMapper.userToUserDto(any(UserEntity.class))).willReturn(userDto);
+
+        //when
+        ResponseEntity<?> res = userService.updateUser(userDto, userId);
+
+        //then
+        assertThat(res).isNotNull();
+        assertThat(res).isEqualTo(MessageResponse.response(Reason.SUCCESS_UPDATE.getValue(), userDto, null, HttpStatus.OK));
+        verify(userRepository, times(1)).findById(userId);
+        verify(roleRepository, times(1)).findAllIds();
+        verify(userRepository, times(1)).findByUsernameIgnoreCase("cavid");
+        verify(userRepository, times(1)).save(any(UserEntity.class));
+        verify(userMapper, times(1)).userToUserDto(any(UserEntity.class));
+    }
+
+    @DisplayName("check update user by id invalid role ids")
+    @Test
+    void givenUserDtoAndUserId_WhenUpdateUser_ThenInvalidRoleIds() {
+        //given
+        Map<String, String> map = new HashMap<>();
+        map.put("roles","problem with role id(s)");
+        Long userId = 1L;
+        given(userRepository.findById(userId)).willReturn(Optional.of(userEntity));
+        given(roleRepository.findAllIds()).willReturn(List.of(2L,3L));
+
+        //when
+        ResponseEntity<?> res = userService.updateUser(userDto, userId);
+
+        //then
+        assertThat(res).isNotNull();
+        assertThat(res).isEqualTo(MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY));
+        verify(userRepository, times(1)).findById(userId);
+        verify(roleRepository, times(1)).findAllIds();
+    }
+
+    @DisplayName("check update user by id unique roleName violation")
+    @Test
+    void givenUserDtoAndUserId_WhenUpdateUser_ThenUniqueViolation() {
+        //given
+        Map<String, String> map = new HashMap<>();
+        map.put("username","username already exists");
+        Long userId = 1L;
+        given(userRepository.findById(userId)).willReturn(Optional.of(userEntity));
+        given(roleRepository.findAllIds()).willReturn(List.of(1L,2L));
+        given(userRepository.findByUsernameIgnoreCase("cavid")).willReturn(Optional.of(userEntity3));
+
+        //when
+        ResponseEntity<?> res = userService.updateUser(userDto, userId);
+
+        //then
+        assertThat(res).isNotNull();
+        assertThat(res).isEqualTo(MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY));
+        verify(userRepository, times(1)).findById(userId);
+        verify(roleRepository, times(1)).findAllIds();
+        verify(userRepository, times(1)).findByUsernameIgnoreCase("cavid");
+    }
+
     //////////////////////////////////////////////////////////////////////////////
-    @Test
-    void deleteUser() {
 
+    @DisplayName("check delete user by id 422")
+    @Test
+    void givenUserId_WhenDeleteUser_ThenUnprocessable() {
+        //given
+        Map<String, String> map = new HashMap<>();
+        map.put("id", "user id doesn't exist");
+        Long userId = 1L;
+        given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+        //when
+        ResponseEntity<?> responseOK = userService.deleteUser(userId);
+
+        //then
+        assertThat(responseOK).isNotNull();
+        assertThat(responseOK).isEqualTo(MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY));
+        verify(userRepository, times(1)).findById(userId);
     }
+
+    @DisplayName("check delete user by id ok")
+    @Test
+    void givenUserId_WhenDeleteUser_ThenOk() {
+        //given
+        Long userId = 1L;
+        given(userRepository.findById(userId)).willReturn(Optional.of(userEntity));
+        given(userMapper.userToUserDto(any(UserEntity.class))).willReturn(userDto);
+
+        //when
+        ResponseEntity<?> responseOK = userService.deleteUser(userId);
+
+        //then
+        assertThat(responseOK).isNotNull();
+        assertThat(responseOK).isEqualTo(MessageResponse.response(Reason.SUCCESS_ADD.getValue(), userDto, null, HttpStatus.OK));
+        verify(userRepository, times(1)).findById(userId);
+        verify(userMapper, times(1)).userToUserDto(any(UserEntity.class));
+    }
+
 }

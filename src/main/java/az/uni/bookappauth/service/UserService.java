@@ -1,6 +1,5 @@
 package az.uni.bookappauth.service;
 
-import az.uni.bookappauth.domain.Role;
 import az.uni.bookappauth.domain.User;
 import az.uni.bookappauth.domain.UserDto;
 import az.uni.bookappauth.entity.RoleEntity;
@@ -29,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final Converter converter;
 
     public Optional<User> getByLogin(@NonNull String login) {//username ve login equalsIgnoreCase() ile yoxlanilir
         log.info("UserService/getByLogin method started");
@@ -36,27 +36,28 @@ public class UserService {
                 .filter(u -> login.equalsIgnoreCase(u.getUsername()))
                 .findFirst().orElseThrow(() -> new AuthException("User is not found"));
         log.info("UserService/getByLogin method  -> status:" + HttpStatus.OK);
-        return entityToDtoLogin(user);
+        return converter.entityToDtoLogin(user);
     }
 
-    private Optional<User> entityToDtoLogin(UserEntity entity) {
-        Optional<User> user =Optional.of(new User());
-
-        user.get().setLogin(entity.getUsername());
-        user.get().setPassword(entity.getPassword());
-        user.get().setFirstName(entity.getName());
-        user.get().setLastName(entity.getSurname());
-
-        Set<Role> roles = new HashSet<>();
-        for (RoleEntity roleEntity : entity.getRoles()) {
-            Role r = new Role();
-            r.setRoleName(roleEntity.getRoleName());
-            roles.add(r);
-        }
-        user.get().setRoles(roles);
-
-        return user;
-    }
+    //bu metodu testinge gore Converter class-ına daşıdım. private metodları test etmək məntiqli deil
+//    private Optional<User> entityToDtoLogin(UserEntity entity) {
+//        Optional<User> user = Optional.of(new User());
+//
+//        user.get().setLogin(entity.getUsername());
+//        user.get().setPassword(entity.getPassword());
+//        user.get().setFirstName(entity.getName());
+//        user.get().setLastName(entity.getSurname());
+//
+//        Set<Role> roles = new HashSet<>();
+//        for (RoleEntity roleEntity : entity.getRoles()) {
+//            Role r = new Role();
+//            r.setRoleName(roleEntity.getRoleName());
+//            roles.add(r);
+//        }
+//        user.get().setRoles(roles);
+//
+//        return user;
+//    }
 
     public ResponseEntity<?> getUsers(){
         log.info("UserService/getUsers method started");
@@ -160,7 +161,7 @@ public class UserService {
         return MessageResponse.response(Reason.SUCCESS_DELETE.getValue(), userDto, null, HttpStatus.OK);
     }
 
-    private boolean CheckContains(List<Long> userRolesIds,List<Long> allRolesIds){
+    private boolean CheckContains(List<Long> userRolesIds, /*@NotNull*/ List<Long> allRolesIds){
         return allRolesIds.containsAll(userRolesIds);
     }
 }
