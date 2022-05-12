@@ -4,11 +4,13 @@ import az.uni.bookappauth.domain.Role;
 import az.uni.bookappauth.domain.User;
 import az.uni.bookappauth.entity.RoleEntity;
 import az.uni.bookappauth.entity.UserEntity;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+@Component
 public class Converter {
     public Optional<User> entityToDtoLogin(UserEntity entity) {
         Optional<User> user = Optional.of(new User());

@@ -30,30 +30,28 @@ public class JwtProvider {
         this.jwtRefreshSecret = jwtRefreshSecret;
     }
 
-    public String generateAccessToken(@NonNull User user) {
+    public String generateAccessToken(@NonNull User user, @NonNull Long expirationTime) {
         final LocalDateTime now = LocalDateTime.now();
-        final Instant accessExpirationInstant = now.plusMinutes(30).atZone(ZoneId.systemDefault()).toInstant();
+        final Instant accessExpirationInstant = now.plusMinutes(expirationTime).atZone(ZoneId.systemDefault()).toInstant();
         final Date accessExpiration = Date.from(accessExpirationInstant);
-        final String accessToken = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(user.getLogin())
                 .setExpiration(accessExpiration)
                 .signWith(SignatureAlgorithm.HS512, jwtAccessSecret)
                 .claim("roles", user.getRoles())
                 .claim("firstName", user.getFirstName())
                 .compact();
-        return accessToken;
     }
 
-    public String generateRefreshToken(@NonNull User user) {
+    public String generateRefreshToken(@NonNull User user, @NonNull Long expirationTime) {
         final LocalDateTime now = LocalDateTime.now();
-        final Instant refreshExpirationInstant = now.plusHours(24).atZone(ZoneId.systemDefault()).toInstant();
+        final Instant refreshExpirationInstant = now.plusHours(expirationTime).atZone(ZoneId.systemDefault()).toInstant();
         final Date refreshExpiration = Date.from(refreshExpirationInstant);
-        final String refreshToken = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(user.getLogin())
                 .setExpiration(refreshExpiration)
                 .signWith(SignatureAlgorithm.HS512, jwtRefreshSecret)
                 .compact();
-        return refreshToken;
     }
 
     public boolean validateAccessToken(@NonNull String token) {

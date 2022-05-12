@@ -34,10 +34,10 @@ public class AuthController {
         return authService.getAccessToken(request.getRefreshToken());
     }
 
-    @Operation(summary = "refresh", description = "get refresh-token", tags = {"Auth"}, security = @SecurityRequirement(name = "bearerAuth"))
-    @PostMapping("refresh")
-    public ResponseEntity<?> getNewRefreshToken(@Valid @RequestBody RefreshJwtRequest request) {
-        return authService.refresh(request.getRefreshToken());
-    }
+//    @Operation(summary = "refresh", description = "get refresh-token", tags = {"Auth"}, security = @SecurityRequirement(name = "bearerAuth"))
+//    @PostMapping("refresh")
+//    public ResponseEntity<?> getNewRefreshToken(@Valid @RequestBody RefreshJwtRequest request) {
+//        return authService.refresh(request.getRefreshToken());
+//    }
 
 }

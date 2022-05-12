@@ -32,6 +32,7 @@ public class AuthorEntity {
     private LocalDateTime updated;
 
     @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn( name = "book_id", referencedColumnName = "book_name")
     private BookEntity book;
 
     @Override
