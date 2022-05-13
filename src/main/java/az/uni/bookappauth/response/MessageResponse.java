@@ -12,7 +12,6 @@ public class MessageResponse {
         return ResponseEntity.ok().body(new ResponseModelDTO(message, data, error));
     }
 
-
     public static ResponseEntity<?> successGetResponse(Object data, Object error) {
         return ResponseEntity.ok().body(new ResponseModelDTO(Reason.SUCCESS_GET.getValue(), data, error));
     }
