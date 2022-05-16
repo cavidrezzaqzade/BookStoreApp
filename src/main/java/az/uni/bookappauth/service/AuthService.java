@@ -27,7 +27,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final Long accessTokenExpTimeMinutes = 30L;
+    private final Long accessTokenExpTimeMinutes = 10L;
     private final Long refreshTokenExpTimeHours = 12L;
 
     private final Logger log = LoggerFactory.getLogger(AuthService.class);
@@ -45,7 +45,7 @@ public class AuthService {
             final String refreshToken = jwtProvider.generateRefreshToken(user, refreshTokenExpTimeHours);
             refreshStorage.put(user.getLogin(), refreshToken);
             log.info("authService/login method ended -> status:" + HttpStatus.OK);
-            return MessageResponse.response(Reason.SUCCESS_GET.getValue(), new JwtResponse(accessToken, refreshToken, accessTokenExpTimeMinutes), null, HttpStatus.OK);
+            return MessageResponse.response(Reason.SUCCESS_GET.getValue(), new JwtResponse(accessToken, refreshToken, accessTokenExpTimeMinutes * 60000), null, HttpStatus.OK);
 //            return new JwtResponse(accessToken, refreshToken);
         } else {
             log.error("authService/login method ended with wrong password -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
@@ -66,7 +66,7 @@ public class AuthService {
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
                 final User user = userService.getByLogin(login)
                         .orElseThrow(() -> new AuthException("User is not found"));
-                final String accessToken = jwtProvider.generateAccessToken(user , accessTokenExpTimeMinutes);
+                final String accessToken = jwtProvider.generateAccessToken(user , accessTokenExpTimeMinutes * 60000);
                 final String newRefreshToken;
                 if(claims.getExpiration().getTime() - new Date().getTime() < ( accessTokenExpTimeMinutes + 1L)){// +1 because refresh token needs rest
                     newRefreshToken = jwtProvider.generateRefreshToken(user, refreshTokenExpTimeHours);

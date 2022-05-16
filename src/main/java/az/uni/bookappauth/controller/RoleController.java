@@ -52,10 +52,10 @@ public class RoleController {
     }
 
 
-    @Operation(summary = "get ", description = "get all rows", tags = {"Role"}, security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "test endpoint", description = "get all rows", tags = {"Role"}, security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/tutorials")
     public List<Tutorial> getAllTutorials() {
-            List<Tutorial> tutorials = new ArrayList<Tutorial>();
+            List<Tutorial> tutorials = new ArrayList<>();
             tutorials.add(new Tutorial("a"));
             tutorials.add(new Tutorial("b"));
 

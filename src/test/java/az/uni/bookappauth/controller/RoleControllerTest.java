@@ -4,41 +4,36 @@ import az.uni.bookappauth.domain.RoleDto;
 import az.uni.bookappauth.filter.JwtFilter;
 import az.uni.bookappauth.response.MessageResponse;
 import az.uni.bookappauth.response.Reason;
-import az.uni.bookappauth.response.ResponseModelDTO;
-import az.uni.bookappauth.service.JwtProvider;
 import az.uni.bookappauth.service.RoleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.coyote.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(RoleController.class)
+@AutoConfigureMockMvc(/*addFilters = false*/)
+//@WebMvcTest(RoleController.class)
+@SpringBootTest
 class RoleControllerTest {
 
     @Autowired
@@ -50,107 +45,79 @@ class RoleControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
     private JwtFilter jwtFilter;
 
-
-    @Test
-    @WithMockUser(username = "admin")
-    void name() throws Exception {
-        //when
-        mockMvc.perform(get("/api/roles")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-    }
-
-  /*  private static final String MAIN_URL= "/caci/fifi/";
-    private static final String MAIN_ID= "1";
-
-    private static RoleDto roleDto;
-    private static List<RoleDto> roleDtos = new ArrayList<>();
-
-    private static ResponseEntity responseGetRoles;*/
-/*    @BeforeEach
+    @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .addFilter(jwtFilter)
                 .apply(springSecurity())
                 .build();
-    }*/
+    }
 
-//    @BeforeAll
-//    static void setUpAll(){
-//
-//        roleDto = RoleDto.builder()
-//                .roleName("Admin")
-//                .build();
-//
-//        roleDtos.add(roleDto);
-//
-//        responseGetRoles = MessageResponse.response(Reason.SUCCESS_GET.getValue(), roleDtos, null, HttpStatus.OK);
-//    }
+    @BeforeAll
+    static void setUpAll(){}
 
-    ////////////////////////////////////////////////////////////////////////
-
-//    @WithMockUser/*(username = "cavid", password = "$2a$10$lX6kBplFbkNe7OAjZHGgYOA6JICljqfpWnSU8cHQepXvt7vfnkITW", roles = {"FUAD"})*/
+    @DisplayName("check get tutorials ok")
     @Test
-    void addNewRole() throws Exception {
+    @WithMockUser
+    void givenNone_WhenGetTutorials_ThenOk() throws Exception {
         //given
-//        doReturn(responseGetRoles).when(roleService).getRoles();
-//        given(roleService.addNewRole(roleDto)).willReturn((null));
+        ResponseEntity<?> response = MessageResponse.response(Reason.SUCCESS_GET.getValue(), null, null, HttpStatus.OK);
+        given(roleService.getRoles()).willReturn(null);
 
-//        //when
-//        ResultActions response = mockMvc.perform(post("/api/roles")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .accept(MediaType.APPLICATION_JSON));
-//
-//        //then
-//        response
-//                .andExpect(status().isOk())
-//                .andDo(print());
-//                .andExpect(jsonPath("$.getStatus()",
-//                                is(null)));
-//                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(responseGetRoles.toString())));
-
-
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-
-    @Test
-    void updateRole() {
-
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-
-    @Test
-    void deleteRole() {
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-
-    @DisplayName("get all roles ok")
-    @Test
-    void givenNone_WhenGetRoles_ThenOK() throws Exception {
-        //given
-//        doReturn(responseGetRoles).when(roleService).getRoles();
-//        given(roleService.getRoles()).willReturn((null));
-
-        //when
-        ResultActions response = mockMvc.perform(get("/api/oles")
+        // when
+        ResultActions result = mockMvc.perform(get("/api/tutorials")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
 
         //then
-        response
+        result
                 .andExpect(status().isOk())
-                .andDo(print());
-//                .andExpect(jsonPath("$.getStatus()",
-//                                is(null)));
-//                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(responseGetRoles.toString())));
-
+                .andDo(print())
+                .andExpect((jsonPath("$.size()").
+                        value(2)));
     }
+
+    @DisplayName("check get tutorials unauthenticated(403)")
+    @Test
+    @WithAnonymousUser
+    void givenNone_WhenGetTutorials_ThenForbidden() throws Exception {
+        //given
+
+        // when
+        ResultActions result = mockMvc.perform(get("/api/tutorials")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+        //then
+        result
+                .andExpect(status().isForbidden())
+                .andDo(print());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+
+    @DisplayName("check get roles ok")
+    @Test
+    @WithMockUser(authorities = {"ADMIN"})
+    void givenNone_WhenGetRoles_ThenOk() throws Exception {
+        //given
+
+        // when
+        ResultActions result = mockMvc.perform(get("/api/roles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+        //then
+        result.andExpect(status().isOk());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
 
 }

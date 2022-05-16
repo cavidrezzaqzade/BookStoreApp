@@ -1,7 +1,6 @@
 package az.uni.bookappauth.service;
 
 import az.uni.bookappauth.domain.Role;
-import az.uni.bookappauth.domain.RoleDto;
 import az.uni.bookappauth.domain.User;
 import az.uni.bookappauth.domain.UserDto;
 import az.uni.bookappauth.entity.RoleEntity;
