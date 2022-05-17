@@ -1,6 +1,8 @@
 package az.uni.bookappauth.controller;
 
 import az.uni.bookappauth.domain.RoleDto;
+import az.uni.bookappauth.response.MessageResponse;
+import az.uni.bookappauth.response.Reason;
 import az.uni.bookappauth.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -51,15 +53,13 @@ public class RoleController {
         return roleService.getRoles();
     }
 
-
     @Operation(summary = "test endpoint", description = "get all rows", tags = {"Role"}, security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/tutorials")
-    public List<Tutorial> getAllTutorials() {
+    public ResponseEntity<?> getAllTutorials() {
             List<Tutorial> tutorials = new ArrayList<>();
             tutorials.add(new Tutorial("a"));
             tutorials.add(new Tutorial("b"));
 
-            return tutorials;
+            return MessageResponse.response(Reason.SUCCESS_GET.getValue(), tutorials, null, HttpStatus.OK);
     }
-
 }
