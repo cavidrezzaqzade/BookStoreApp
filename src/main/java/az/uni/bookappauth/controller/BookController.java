@@ -2,7 +2,7 @@ package az.uni.bookappauth.controller;
 
 import az.uni.bookappauth.domain.app.BookDto;
 import az.uni.bookappauth.domain.app.SearchBookDto;
-import az.uni.bookappauth.service.app.BookService;
+import az.uni.bookappauth.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

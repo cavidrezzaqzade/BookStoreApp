@@ -1,4 +1,4 @@
-package az.uni.bookappauth.service.app;
+package az.uni.bookappauth.service;
 
 import az.uni.bookappauth.domain.app.AuthorDto;
 import az.uni.bookappauth.domain.app.BookDto;

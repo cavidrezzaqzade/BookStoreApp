@@ -14,11 +14,11 @@ public class ResponseModelDTO<T> extends ResponseModel {
         this.errors = errors;
     }
 
-    public ResponseModelDTO(String message) {
-        super(message);
-    }
-
-    public ResponseModelDTO(T data) {
-        this.data = data;
-    }
+//    public ResponseModelDTO(String message) {
+//        super(message);
+//    }
+//
+//    public ResponseModelDTO(T data) {
+//        this.data = data;
+//    }
 }

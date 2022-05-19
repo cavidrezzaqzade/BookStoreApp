@@ -2,7 +2,7 @@ package az.uni.bookappauth.exception.excModel.dto;
 
 public enum DefaultException {
 
-    USER_NOT_FOUND("User not founded"),
+    USER_NOT_FOUND("User not found"),
     NAME_ALREADY_EXIST("This name already exist.");
 
     private final String value;

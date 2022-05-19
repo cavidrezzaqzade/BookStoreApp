@@ -1,10 +1,11 @@
 package az.uni.bookappauth.controller;
 
-import az.uni.bookappauth.domain.RoleDto;
+import az.uni.bookappauth.domain.UserDto;
 import az.uni.bookappauth.filter.JwtFilter;
 import az.uni.bookappauth.response.MessageResponse;
 import az.uni.bookappauth.response.Reason;
-import az.uni.bookappauth.service.RoleService;
+import az.uni.bookappauth.service.UserService;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,25 +26,30 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * @author caci
+ * @since 18.05.2022
+ */
+
 @SuppressWarnings("unchecked")
-@AutoConfigureMockMvc(/*addFilters = false*/)
-//@WebMvcTest(RoleController.class)
+@AutoConfigureMockMvc
 @SpringBootTest
-class RoleControllerTest {
+class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private RoleService roleService;
+    private UserService userService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -54,22 +60,22 @@ class RoleControllerTest {
     @Autowired
     private JwtFilter jwtFilter;
 
-    private static RoleDto roleDto;
-    private static RoleDto roleDto2;
-    private static List<RoleDto> roles;
-    private static RoleDto roleDtoUpdated;
+    private static UserDto userDto;
+    private static UserDto userDto2;
+    private static List<UserDto> users;
+    private static UserDto userDtoUpdated;
 
     private static final String ROLE_ADMIN = "ADMIN";
     private static final String ROLE_USER = "USER";
 
     @BeforeAll
     static void setUpAll(){
-        roleDto = RoleDto.builder().id(1L).roleName("ADMIN").build();
-        roleDto2 = RoleDto.builder().id(2L).roleName("USER").build();
+        userDto = UserDto.builder().id(1L).roles(List.of(1L, 2L)).username("cavid").password("12345").build();
+        userDto2 = UserDto.builder().id(2L).username("xanlar").password("dumb").build();
 
-        roles = List.of(roleDto, roleDto2);
+        users = List.of(userDto, userDto2);
 
-        roleDtoUpdated = RoleDto.builder().id(1L).roleName("ADMIN2").build();
+        userDtoUpdated = UserDto.builder().id(1L).username("cavid2").password("dumb").build();
     }
 
     @BeforeEach
@@ -79,23 +85,26 @@ class RoleControllerTest {
                 .addFilter(jwtFilter)
                 .apply(springSecurity())
                 .build();
+
+        //for disable JsonProperty.Access.WRITE_ONLY of UserDto
+        objectMapper.configure(MapperFeature.USE_ANNOTATIONS, false);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    @DisplayName("check get roles ok")
+    @DisplayName("check get users ok")
     @WithMockUser(authorities = {ROLE_ADMIN})
-    void givenNone_WhenGetRoles_ThenOk() throws Exception {
+    void givenNone_WhenGetUsers_ThenOk() throws Exception {
         //given
         String message = Reason.SUCCESS_GET.getValue();
-        int rolesSize = roles.size();
+        int usersSize = users.size();
 
-        ResponseEntity response = MessageResponse.response(Reason.SUCCESS_GET.getValue(), roles, null, HttpStatus.OK);
-        given(roleService.getRoles()).willReturn(response);
+        ResponseEntity response = MessageResponse.response(Reason.SUCCESS_GET.getValue(), users, null, HttpStatus.OK);
+        given(userService.getUsers()).willReturn(response);
 
         //when
-        ResultActions result = mockMvc.perform(get("/api/roles")
+        ResultActions result = mockMvc.perform(get("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
 
@@ -107,19 +116,19 @@ class RoleControllerTest {
                         .value(3)))
                 .andExpect((jsonPath("$.message")
                         .value(message)))
-                .andExpect(jsonPath("$.data.size()").value(rolesSize))
+                .andExpect(jsonPath("$.data.size()").value(usersSize))
                 .andExpect(jsonPath("$.errors", nullValue()));
     }
 
     @Test
-    @DisplayName("check get roles with wrong role")
+    @DisplayName("check get users with wrong role")
     @WithMockUser(authorities = {ROLE_USER})
-    void givenTestRoles_WhenGetRoles_ThenUnAuth() throws Exception {
+    void givenNone_WhenGetUsers_ThenUnAuth() throws Exception {
         //given
         String message = "access denied for token";
 
         //when
-        ResultActions result = mockMvc.perform(get("/api/roles")
+        ResultActions result = mockMvc.perform(get("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
 
@@ -131,28 +140,27 @@ class RoleControllerTest {
                         .value(3)))
                 .andExpect((jsonPath("$.message")
                         .value(message)))
-                .andExpect(jsonPath("$.errors", notNullValue()))
-                .andExpect(jsonPath("$.data",nullValue()));
-
+                .andExpect(jsonPath("$.data", nullValue()))
+                .andExpect(jsonPath("$.errors", notNullValue()));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    @DisplayName("check add role ok")
+    @DisplayName("check add user ok")
     @WithMockUser(authorities = {ROLE_ADMIN})
-    void givenRoleDto_WhenAddRole_ThenOk() throws Exception {
+    void givenUserDto_WhenAddUser_ThenOk() throws Exception {
         //given
         String message = Reason.SUCCESS_ADD.getValue();
 
-        ResponseEntity response = MessageResponse.response(Reason.SUCCESS_ADD.getValue(), roleDto, null, HttpStatus.OK);
-        given(roleService.addNewRole(any())).willReturn(response);
+        ResponseEntity response = MessageResponse.response(Reason.SUCCESS_ADD.getValue(), userDto, null, HttpStatus.OK);
+        given(userService.addNewUser(any())).willReturn(response);
 
         //when
-        ResultActions result = mockMvc.perform(post("/api/roles")
+        ResultActions result = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(roleDto)));
+                .content(objectMapper.writeValueAsString(userDto)));
 
         //then
         result
@@ -167,17 +175,17 @@ class RoleControllerTest {
     }
 
     @Test
-    @DisplayName("check add role with wrong role")
+    @DisplayName("check add user with wrong role")
     @WithMockUser(authorities = {ROLE_USER})
-    void givenRoleDto_WhenAddRole_ThenUnAuth() throws Exception {
+    void givenRoleDto_WhenAddUser_ThenUnAuth() throws Exception {
         //given
         String message = "access denied for token";
 
         //when
-        ResultActions result = mockMvc.perform(post("/api/roles")
+        ResultActions result = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(roleDto)));
+                .content(objectMapper.writeValueAsString(userDto)));
 
         //then
         result
@@ -191,23 +199,23 @@ class RoleControllerTest {
                 .andExpect(jsonPath("$.errors", notNullValue()));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    @DisplayName("check update role ok")
+    @DisplayName("check update user ok")
     @WithMockUser(authorities = {ROLE_ADMIN})
-    void givenRoleDto_WhenUpdateRole_ThenOk() throws Exception {
+    void givenRoleDto_WhenUpdateUser_ThenOk() throws Exception {
         //given
         String message = Reason.SUCCESS_UPDATE.getValue();
 
-        ResponseEntity response = MessageResponse.response(Reason.SUCCESS_UPDATE.getValue(), roleDtoUpdated, null, HttpStatus.OK);
-        given(roleService.updateRole(any(), any())).willReturn(response);
+        ResponseEntity response = MessageResponse.response(Reason.SUCCESS_UPDATE.getValue(), userDtoUpdated, null, HttpStatus.OK);
+        given(userService.updateUser(any(), any())).willReturn(response);
 
         //when
-        ResultActions result = mockMvc.perform(put("/api/roles/{id}", 1)
+        ResultActions result = mockMvc.perform(put("/api/users/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(roleDto)));
+                .content(objectMapper.writeValueAsString(userDto)));
 
         //then
         result
@@ -217,23 +225,25 @@ class RoleControllerTest {
                         .value(3)))
                 .andExpect((jsonPath("$.message")
                         .value(message)))
-                .andExpect((jsonPath("$.data.roleName")
-                        .value("ADMIN2")))
+                .andExpect((jsonPath("$.data.username")
+                        .value("cavid2")))
+                .andExpect((jsonPath("$.data.password")
+                        .value("dumb")))
                 .andExpect(jsonPath("$.errors", nullValue()));
     }
 
     @Test
-    @DisplayName("check update role with wrong role")
+    @DisplayName("check update user with wrong role")
     @WithMockUser(authorities = {ROLE_USER})
-    void givenRoleDto_WhenUpdateRole_ThenUnAuth() throws Exception {
+    void givenRoleDto_WhenUpdateUser_ThenUnAuth() throws Exception {
         //given
         String message = "access denied for token";
 
         //when
-        ResultActions result = mockMvc.perform(put("/api/roles/{id}", 1L)
+        ResultActions result = mockMvc.perform(put("/api/users/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(roleDto)));
+                .content(objectMapper.writeValueAsString(userDto)));
 
         //then
         result
@@ -247,23 +257,23 @@ class RoleControllerTest {
                 .andExpect(jsonPath("$.errors", notNullValue()));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    @DisplayName("check delete role ok")
+    @DisplayName("check delete user ok")
     @WithMockUser(authorities = {ROLE_ADMIN})
-    void givenRoleDto_WhenDeleteRole_ThenOk() throws Exception {
+    void givenRoleDto_WhenDeleteUser_ThenOk() throws Exception {
         //given
         String message = Reason.SUCCESS_DELETE.getValue();
 
-        ResponseEntity response = MessageResponse.response(Reason.SUCCESS_DELETE.getValue(), roleDto, null, HttpStatus.OK);
-        given(roleService.deleteRole(1L)).willReturn(response);
+        ResponseEntity response = MessageResponse.response(Reason.SUCCESS_DELETE.getValue(), userDto, null, HttpStatus.OK);
+        given(userService.deleteUser(1L)).willReturn(response);
 
         //when
-        ResultActions result = mockMvc.perform(delete("/api/roles/{id}", 1)
+        ResultActions result = mockMvc.perform(delete("/api/users/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(roleDto)));
+                .content(objectMapper.writeValueAsString(userDto)));
 
         //then
         result
@@ -278,17 +288,17 @@ class RoleControllerTest {
     }
 
     @Test
-    @DisplayName("check delete role with wrong role")
+    @DisplayName("check delete user with wrong role")
     @WithMockUser(authorities = {ROLE_USER})
-    void givenRoleDto_WhenDeleteRole_ThenUnAuth() throws Exception {
+    void givenRoleDto_WhenDeleteUser_ThenUnAuth() throws Exception {
         //given
         String message = "access denied for token";
 
         //when
-        ResultActions result = mockMvc.perform(delete("/api/roles/{id}", 1L)
+        ResultActions result = mockMvc.perform(delete("/api/users/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(roleDto)));
+                .content(objectMapper.writeValueAsString(userDto)));
 
         //then
         result
@@ -301,4 +311,8 @@ class RoleControllerTest {
                 .andExpect((jsonPath("$.data", nullValue() )))
                 .andExpect(jsonPath("$.errors", notNullValue()));
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    
 }

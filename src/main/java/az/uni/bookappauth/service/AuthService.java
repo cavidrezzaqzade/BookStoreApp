@@ -1,6 +1,5 @@
 package az.uni.bookappauth.service;
 
-import az.uni.bookappauth.domain.JwtAuthentication;
 import az.uni.bookappauth.domain.JwtRequest;
 import az.uni.bookappauth.domain.JwtResponse;
 import az.uni.bookappauth.domain.User;
@@ -14,12 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,16 +54,12 @@ public class AuthService {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();
             final String saveRefreshToken = refreshStorage.get(login);
-            System.out.println(claims.getExpiration());
-            System.out.println(new Date());
-            System.out.println(LocalDateTime.now());
-            System.out.println(claims.getExpiration().getTime() - new Date().getTime());
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
                 final User user = userService.getByLogin(login)
                         .orElseThrow(() -> new AuthException("User is not found"));
                 final String accessToken = jwtProvider.generateAccessToken(user , accessTokenExpTimeMinutes * 60000);
                 final String newRefreshToken;
-                if(claims.getExpiration().getTime() - new Date().getTime() < ( accessTokenExpTimeMinutes + 1L)){// +1 because refresh token needs rest
+                if(claims.getExpiration().getTime() - new Date().getTime() < ( accessTokenExpTimeMinutes + 1L)){//check if old refresh does not expired then return it instead new one // +1 because refresh token needs rest
                     newRefreshToken = jwtProvider.generateRefreshToken(user, refreshTokenExpTimeHours);
                     refreshStorage.remove(user.getLogin());
                     refreshStorage.put(user.getLogin(), newRefreshToken);
@@ -85,30 +76,4 @@ public class AuthService {
         throw new AuthException("Invalid JWT token");
 //        return new JwtResponse(null, null);
     }
-
-//    public ResponseEntity<?> refresh(@NonNull String refreshToken) {
-//        log.info("authService/getAccessToken method started");
-//        if (jwtProvider.validateRefreshToken(refreshToken)) {
-//            final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
-//            final String login = claims.getSubject();
-//            final String saveRefreshToken = refreshStorage.get(login);
-//            if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-//                final User user = userService.getByLogin(login)
-//                        .orElseThrow(() -> new AuthException("User is not found"));
-//                final String accessToken = jwtProvider.generateAccessToken(user, accessTokenExpTimeMinutes);
-//                final String newRefreshToken = jwtProvider.generateRefreshToken(user);
-//                refreshStorage.put(user.getLogin(), newRefreshToken);
-//                log.info("authService/getAccessToken method ended");
-//                return MessageResponse.response(Reason.SUCCESS_GET.getValue(), new JwtResponse(accessToken, newRefreshToken, null), null, HttpStatus.OK);
-////                return new JwtResponse(accessToken, newRefreshToken);
-//            }
-//        }
-//        log.info("authService/getAccessToken method ended with invalid jwt token");
-//        throw new AuthException("Invalid JWT token");
-//    }
-
-    public JwtAuthentication getAuthInfo() {
-        return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
-    }
-
 }

@@ -1,21 +1,16 @@
 package az.uni.bookappauth.controller;
 
 import az.uni.bookappauth.domain.RoleDto;
-import az.uni.bookappauth.response.MessageResponse;
-import az.uni.bookappauth.response.Reason;
 import az.uni.bookappauth.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -51,15 +46,5 @@ public class RoleController {
     @GetMapping("/roles")
     public ResponseEntity<?> getRoles() {
         return roleService.getRoles();
-    }
-
-    @Operation(summary = "test endpoint", description = "get all rows", tags = {"Role"}, security = @SecurityRequirement(name = "bearerAuth"))
-    @GetMapping("/tutorials")
-    public ResponseEntity<?> getAllTutorials() {
-            List<Tutorial> tutorials = new ArrayList<>();
-            tutorials.add(new Tutorial("a"));
-            tutorials.add(new Tutorial("b"));
-
-            return MessageResponse.response(Reason.SUCCESS_GET.getValue(), tutorials, null, HttpStatus.OK);
     }
 }

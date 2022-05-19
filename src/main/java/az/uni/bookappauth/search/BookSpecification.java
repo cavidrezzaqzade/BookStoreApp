@@ -3,7 +3,6 @@ package az.uni.bookappauth.search;
 import az.uni.bookappauth.entity.BookEntity;
 import lombok.*;
 import org.springframework.data.jpa.domain.Specification;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;

@@ -187,6 +187,7 @@ class UserServiceTest {
     void givenUserDto_WhenAddNewUser_ThenOk() {
         //given
         given(userRepository.existsByUsernameIgnoreCase("cavid")).willReturn(false);
+        given(roleRepository.findAllIds()).willReturn(List.of(1L, 2L));
         given(userRepository.save(any(UserEntity.class))).willReturn(userEntity);
         given(userMapper.userToUserDto(any(UserEntity.class))).willReturn(userDto);
 
@@ -197,13 +198,14 @@ class UserServiceTest {
         assertThat(res).isNotNull();
         assertThat(res).isEqualTo(MessageResponse.response(Reason.SUCCESS_ADD.getValue(), userDto, null, HttpStatus.OK));
         verify(userRepository, times(1)).existsByUsernameIgnoreCase("cavid");
+        verify(roleRepository, times(1)).findAllIds();
         verify(userRepository, times(1)).save(any(UserEntity.class));
         verify(userMapper, times(1)).userToUserDto(any(UserEntity.class));
     }
 
     @DisplayName("check add new user 422")
     @Test
-    void givenUserDto_WhenAddNewUser_Thenunprocessable() {
+    void givenUserDto_WhenAddNewUser_ThenUnprocessable() {
         //given
         Map<String, String> map = new HashMap<>();
         map.put("username", "data already exists");
@@ -216,6 +218,25 @@ class UserServiceTest {
         assertThat(res).isNotNull();
         assertThat(res).isEqualTo(MessageResponse.response(Reason.SUCCESS_ADD.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY));
         verify(userRepository, times(1)).existsByUsernameIgnoreCase("cavid");
+    }
+
+    @DisplayName("check add new user 422 due to roleIds")
+    @Test
+    void givenUserDto_WhenAddNewUser_ThenUnproccessable() {
+        //given
+        Map<String, String> map = new HashMap<>();
+        map.put("roles", "problem with role id(s)");
+        given(userRepository.existsByUsernameIgnoreCase("cavid")).willReturn(false);
+        given(roleRepository.findAllIds()).willReturn(List.of(-1L, -2L));
+
+        //when
+        ResponseEntity<?> res = userService.addNewUser(userDto);
+
+        //then
+        assertThat(res).isNotNull();
+        assertThat(res).isEqualTo(MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY));
+        verify(userRepository, times(1)).existsByUsernameIgnoreCase("cavid");
+        verify(roleRepository, times(1)).findAllIds();
     }
 
     //////////////////////////////////////////////////////////////////////////////
