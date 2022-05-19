@@ -12,7 +12,7 @@
         </Console>
 
         <!-- Rolling File Appender -->
-        <RollingFile name="FileAppender" fileName="logs/book-app-auth/aers-auth.log"
+        <RollingFile name="FileAppender" fileName="logs/book-app-auth/book-app-auth.log"
                      filePattern="logs/book-app-auth/book-app-auth-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout>
                 <Pattern>${LOG_PATTERN}</Pattern>
