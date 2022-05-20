@@ -83,7 +83,7 @@ public class UserService {
         if(!CheckContains(user.getRoles(), rolesIds))
             map.put("roles", "problem with role id(s)");
         if(!map.isEmpty()){
-            log.error("UserService/addNewUser method ended with roleName(s) does not exist error -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
+            log.error("UserService/addNewUser method ended problem with roleId(s) does not exist error -> status:" + HttpStatus.UNPROCESSABLE_ENTITY);
             return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, map, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 

@@ -58,6 +58,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 //        errors.put("message", ex.getMessage());
 //        return MessageResponse.response(Reason.VALIDATION_ERRORS.getValue(), null, errors, HttpStatus.UNPROCESSABLE_ENTITY);
 //    }
+
     @ExceptionHandler(AuthException.class)
     public final ResponseEntity<?> handleAuthException(AuthException ex, WebRequest request) {
         log.error("AuthException handler exception -> " + ex.getMessage());
